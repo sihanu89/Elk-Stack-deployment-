@@ -107,6 +107,75 @@ These files have been tested and used to generate a live ELK deployment on Azure
           - 5044:5044
   ```
 
+#### Playbook 3: 
+ [Filebeat_playbook](Ansible/filebeat_playbook.yml)
+```
+---
+- name: installing and launching filebeat
+  hosts: webservers
+  become: yes
+  tasks:
+
+  - name: download filebeat deb
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.4.0-amd64.deb
+
+  - name: install filebeat deb
+    command: dpkg -i filebeat-7.4.0-amd64.deb
+
+  - name: drop in filebeat.yml
+    copy:
+      src: /etc/ansible/files/filebeat-config.yml
+      dest: /etc/filebeat/filebeat.yml
+
+  - name: enable and configure system module
+    command: filebeat modules enable system
+
+  - name: setup filebeat
+    command: filebeat setup
+
+  - name: start filebeat service
+    command: service filebeat start
+
+  - name: enable filebeat service
+    systemd:
+      name: filebeat
+      enabled: yes
+ ```
+ #### Playbook 3: 
+ [Metricbeat_playbook](Ansible/metricbeat_playbook.yml)
+  ```
+  ---
+- name: Install metric beat
+  hosts: webservers
+  become: true
+  tasks:
+
+  - name: Download metricbeat
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.1-amd64.deb
+
+  - name: Install metricbeat
+    command: dpkg -i metricbeat-7.6.1-amd64.deb
+
+  - name: drop in metricbeat config
+    copy:
+      src: /etc/ansible/files/metricbeat-config.yml
+      dest: /etc/metricbeat/metricbeat.yml
+
+  - name: enable and configure docker module for metricbeat
+    command: metricbeat modules enable docker
+
+  - name: setup metricbeat
+    command: metricbeat setup
+
+  - name: start metricbeat
+    command: service metricbeat start
+
+  - name: enable service metricbeat on boot
+    systemd:
+      name: metricbeat
+      enabled: yes
+ ```
+ 
 This document contains the following details:
 - Description of the Topology
 - Access Policies
