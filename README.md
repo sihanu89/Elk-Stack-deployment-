@@ -191,8 +191,8 @@ The main purpose of this network is to expose a load-balanced and monitored inst
 
 Load balancing ensures that the application will be highly available, in addition to restricting access to the network.
 
-- Load balancers protect availability of web-serves by sharing client requests across a number of servers.
--	The advantage of using a Jumb Box is that it restrict access to the network by not allowing any access other protocols except ssh and thus provides a segregation layer between the network and the user thus .So it makes an attack harder by minimizing attack surface. Further any tools or applications in web-servers can be maintained using Jump Box.
+- Load balancers protect availability of web-serves by sharing client requests across several servers.
+-	The advantage of using a Jump Box is that it restricts access to the network by not allowing any access other protocols except ssh and thus provides a segregation layer between the network and the user thus .So, it makes an attack harder by minimizing attack surface. Further any tools or applications in web-servers can be maintained using Jump Box.
 
 Integrating an ELK server allows users to easily monitor the vulnerable VMs for changes to the configuration and system files.
 
@@ -238,7 +238,7 @@ A summary of the access policies in place can be found in the table below.
 Ansible was used to automate configuration of the ELK machine. No configuration was performed manually, which is advantageous because:
 -	system configuration and deployment can be done consistently and quickly for all web servers at same time.
 -	Ansible automation is not complex and ease to use.
--	It minimizes the attack surface as it not require any remote server agent.  
+-	It minimizes the attack surface as it does not require any remote server agent.  
 
 The playbook implements the following tasks:
 -	Installs Docker
