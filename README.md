@@ -4,12 +4,178 @@ Linux and Cloud system hardening
 
 The files in this repository were used to configure the network depicted below.
 
-![TODO: Update the path with the name of your diagram](Images/diagram_filename.png)
+![Elk server Network diagram](Diagrams/Elk_Network_Diagram.pdf)
 
 These files have been tested and used to generate a live ELK deployment on Azure. They can be used to either recreate the entire deployment pictured above. Alternatively, select portions of the playbook file may be used to install only certain pieces of it, such as Filebeat.
 
-  - _TODO: Enter the playbook file._
+ #### Playbook 1: 
+ [DVWA_pentest_playbook](Ansible/DVWA_pentest_playbook.yml)
+ ```
+ ---
+- name: DVWA_pentest playbook
+  hosts: webservers
+  become: true
+  tasks:
 
+  - name: Install docker.io
+    apt:
+      update_cache: yes
+      name: docker.io
+      state: present
+
+  - name: Install pip3
+    apt:
+      name: python3-pip
+      state: present
+
+  - name: Install Docker python module
+    pip:
+      name: docker
+      state: present
+
+  - name: download and launch a docker we container
+    docker_container:
+      name: dvwa
+      image: cyberxsecurity/dvwa
+      state: started
+      restart_policy: always
+      published_ports: 80:80
+
+  - name: Enable docker service
+    systemd:
+      name: docker
+      enabled: yes
+```
+#### Playbook 2: 
+ [Elk_playbook](Ansible/elk_playbook.yml)
+```
+ ---
+- name: Config elk VM with Docker
+  hosts: elk
+  remote_user: azdmin
+  become: true
+  tasks:
+
+    # Use apt module
+    - name: Install docker.io
+      apt:
+        update_cache: yes
+        name: docker.io
+        state: present
+
+    # Use apt module
+    - name: Install python3-pip
+      apt:
+        name: python3-pip
+        state: present
+
+    # Use pip module
+    - name: Install Docker module
+      pip:
+        name: docker
+        state: present
+
+    # Use systemd module
+    - name: Eable service docker on boot
+      systemd:
+        name: docker
+        enabled: yes
+
+    # Use command module
+    - name: Increase virtual memory
+      command: sysctl -w vm.max_map_count=262144
+
+    # Use sysctl module
+    - name: Use more memory
+      sysctl:
+        name: vm.max_map_count
+        value: 262144
+        state: present
+        reload: yes
+
+    # Use docker_container module
+    - name: download and launch a docker elk container
+      docker_container:
+        name: elk
+        image: sebp/elk:761
+        state: started
+        restart_policy: always
+        # lists the ports elk runs on
+        published_ports:
+          - 5601:5601
+          - 9200:9200
+          - 5044:5044
+  ```
+
+#### Playbook 3: 
+ [Filebeat_playbook](Ansible/filebeat_playbook.yml)
+```
+---
+- name: installing and launching filebeat
+  hosts: webservers
+  become: yes
+  tasks:
+
+  - name: download filebeat deb
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.4.0-amd64.deb
+
+  - name: install filebeat deb
+    command: dpkg -i filebeat-7.4.0-amd64.deb
+
+  - name: drop in filebeat.yml
+    copy:
+      src: /etc/ansible/files/filebeat-config.yml
+      dest: /etc/filebeat/filebeat.yml
+
+  - name: enable and configure system module
+    command: filebeat modules enable system
+
+  - name: setup filebeat
+    command: filebeat setup
+
+  - name: start filebeat service
+    command: service filebeat start
+
+  - name: enable filebeat service
+    systemd:
+      name: filebeat
+      enabled: yes
+ ```
+ #### Playbook 3: 
+ [Metricbeat_playbook](Ansible/metricbeat_playbook.yml)
+  ```
+  ---
+- name: Install metric beat
+  hosts: webservers
+  become: true
+  tasks:
+
+  - name: Download metricbeat
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.1-amd64.deb
+
+  - name: Install metricbeat
+    command: dpkg -i metricbeat-7.6.1-amd64.deb
+
+  - name: drop in metricbeat config
+    copy:
+      src: /etc/ansible/files/metricbeat-config.yml
+      dest: /etc/metricbeat/metricbeat.yml
+
+  - name: enable and configure docker module for metricbeat
+    command: metricbeat modules enable docker
+
+  - name: setup metricbeat
+    command: metricbeat setup
+
+  - name: start metricbeat
+    command: service metricbeat start
+
+  - name: enable service metricbeat on boot
+    systemd:
+      name: metricbeat
+      enabled: yes
+ ```
+ 
 This document contains the following details:
 - Description of the Topology
 - Access Policies
@@ -32,8 +198,9 @@ Integrating an ELK server allows users to easily monitor the vulnerable VMs for 
 
 -	Filebeat is used to monitor logs files.
 -	Metricbeat is used to collect various types of OS data and statistics.
+
 The configuration details of each machine may be found below.
-_Note: Use the [Markdown Table Generator](http://www.tablesgenerator.com/markdown_tables) to add/remove values from the table_.
+
 
 | Name     | Function | IP Address | Operating System |
 |----------|----------|------------|------------------|
