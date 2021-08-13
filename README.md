@@ -1,4 +1,4 @@
-# cyb-sec-journey-
+# Elk-Stack-deployment-
 Linux and Cloud system hardening
 ## Automated ELK Stack Deployment
 
